@@ -9,6 +9,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { TextField } from '@material-ui/core';
+import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -26,7 +27,9 @@ class FarmApp extends React.Component {
       selectedFarmId: null,
       searchText: '',
       minimumRevenue: 0,
-      maximumRevenue: Number.POSITIVE_INFINITY
+      maximumRevenue: Number.POSITIVE_INFINITY,
+      maximumRevenueError: '',
+      minimumRevenueError: ''
     };
 
     this.handleSelectFarm = this.handleSelectFarm.bind(this);
@@ -44,7 +47,6 @@ class FarmApp extends React.Component {
     const newMinimumRevenue = prevState.minimumRevenue !== this.state.minimumRevenue;
     const newMaximumRevenue = prevState.maximumRevenue !== this.state.maximumRevenue;
     if (newSearchText || newMinimumRevenue || newMaximumRevenue) {
-      console.log('filter farms')
       this.filterFarms();
     }
   }
@@ -96,15 +98,26 @@ class FarmApp extends React.Component {
   }
 
   handleMinimumRevenueFilter(e) {
-    console.log('e.target.value', e.target.value);
-    // TODO: check for number type
-    this.setState({ minimumRevenue: Number(e.target.value) });
+    this.setState({ minimumRevenueError: ''});
+    let value = e.target.value;
+    if (isNaN(Number(value))) {
+      this.setState({ minimumRevenueError: 'Enter a number.'})
+      return;
+    }
+    if (value === '') {
+      // reset
+      value = 0;
+    }
+    this.setState({ minimumRevenue: Number(value) });
   }
 
   handleMaximumRevenueFilter(e) {
-    console.log('e.target.value', e.target.value);
-    // TODO: check for number type
+    this.setState({ maximumRevenueError: ''});
     let value = e.target.value;
+    if (isNaN(Number(value))) {
+      this.setState({ maximumRevenueError: 'Enter a number.'})
+      return;
+    }
     if (value === '') {
       // reset
       value = Number.POSITIVE_INFINITY;
@@ -114,7 +127,7 @@ class FarmApp extends React.Component {
 
   render() {
     const { classes } = this.props;
-    const { farmList, selectedFarmId, farmData } = this.state;
+    const { farmList, selectedFarmId, farmData, maximumRevenueError, minimumRevenueError } = this.state;
     const selectedFarm = farmData[selectedFarmId];
 
   	return (
@@ -136,9 +149,12 @@ class FarmApp extends React.Component {
         >
           <Toolbar />
           <div className={classes.drawerContainer}>
-            <TextField label="Search for farm name" onChange={this.handleFarmNameFilter} />
-            <TextField label="Minimum revenue" onChange={this.handleMinimumRevenueFilter} />
-            <TextField label="Maximum revenue" onChange={this.handleMaximumRevenueFilter} />
+            <div className={classes.filterContainer}>
+              <TextField label="Search for farm name" onChange={this.handleFarmNameFilter} />
+              <TextField error={!!minimumRevenueError} helperText={minimumRevenueError} label="Minimum revenue" onChange={this.handleMinimumRevenueFilter} />
+              <TextField error={!!maximumRevenueError} helperText={maximumRevenueError} label="Maximum revenue" onChange={this.handleMaximumRevenueFilter} />
+            </div>
+            <Divider />
             <List>
               {farmList
                 .filter(farm => farm.display)
@@ -185,6 +201,10 @@ const useStyles = (theme) => ({
   },
   drawerContainer: {
     overflow: 'auto',
+  },
+  filterContainer: {
+    paddingLeft: 16,
+    marginBottom: 20
   },
   content: {
     flexGrow: 1,
