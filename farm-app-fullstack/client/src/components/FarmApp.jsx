@@ -10,6 +10,9 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { TextField } from '@material-ui/core';
 import Divider from '@material-ui/core/Divider';
+import Card from '@material-ui/core/Card';
+import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent';
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
 
@@ -65,6 +68,7 @@ class FarmApp extends React.Component {
           });
         }
         console.log('farmList', farmList);
+        console.log('farmData', farmData);
         this.setState({ farmData, farmList });
       });
   }
@@ -169,13 +173,31 @@ class FarmApp extends React.Component {
         <main className={classes.content}>
           <Toolbar />
           {!!selectedFarm && (
-            <div>
-              <h1>{selectedFarm.name}</h1>
-              <p>state: {selectedFarm.state}</p>
-              <p>soil type: {selectedFarm.soil_type}</p>
-              <p>revenue: {selectedFarm.revenue}</p>
-            </div>
+            <Card className={classes.card}>
+              <CardContent>
+                <h1>{`Farm: ${selectedFarm.name}`}</h1>
+                {Object.keys(selectedFarm)
+                  .filter(property => typeof selectedFarm[property] !== 'object')
+                  .map(property => (
+                    <p key={property}>{`${property}: ${selectedFarm[property]}`}</p>
+                  ))
+                }
+              </CardContent>
+            </Card>
           )}
+          {!!selectedFarm && Object.keys(selectedFarm.fields).map((fieldName, fieldIndex) => {
+            const field = selectedFarm.fields[fieldName];
+            return (
+              <Card key={fieldName} className={classes.card}>
+                <CardContent>
+                  <h1>{`Field ${fieldIndex + 1}: ${fieldName}`}</h1>
+                  {Object.keys(field).map(property => (
+                    <p key={property}>{`${property}: ${field[property]}`}</p>
+                  ))}
+                </CardContent>
+              </Card>
+            )
+          })}
         </main>
       </div>
   	)
@@ -210,6 +232,9 @@ const useStyles = (theme) => ({
     flexGrow: 1,
     padding: theme.spacing(3),
   },
+  card: {
+    marginBottom: 10
+  }
 });
 
 export default withStyles(useStyles)(FarmApp);
