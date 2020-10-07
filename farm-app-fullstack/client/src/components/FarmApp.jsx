@@ -23,15 +23,30 @@ class FarmApp extends React.Component {
     this.state = {
       farmList: [],
       farmData: {},
-      selectedFarmId: null
+      selectedFarmId: null,
+      searchText: '',
+      minimumRevenue: 0,
+      maximumRevenue: Number.POSITIVE_INFINITY
     };
 
     this.handleSelectFarm = this.handleSelectFarm.bind(this);
     this.handleFarmNameFilter = this.handleFarmNameFilter.bind(this);
+    this.handleMinimumRevenueFilter = this.handleMinimumRevenueFilter.bind(this);
+    this.handleMaximumRevenueFilter = this.handleMaximumRevenueFilter.bind(this);
   }
 
   componentDidMount() {
     this.getFarmData();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const newSearchText = prevState.searchText !== this.state.searchText;
+    const newMinimumRevenue = prevState.minimumRevenue !== this.state.minimumRevenue;
+    const newMaximumRevenue = prevState.maximumRevenue !== this.state.maximumRevenue;
+    if (newSearchText || newMinimumRevenue || newMaximumRevenue) {
+      console.log('filter farms')
+      this.filterFarms();
+    }
   }
 
   getFarmData() {
@@ -52,6 +67,23 @@ class FarmApp extends React.Component {
       });
   }
 
+  filterFarms() {
+    const { farmList, searchText, minimumRevenue, maximumRevenue } = this.state;
+    farmList.forEach(farm => {
+      const farmNameContainsSearchText = farm.name.toLowerCase().indexOf(searchText) > -1;
+      const farmMakesAtLeastMinimumRevenue = farm.revenue >= minimumRevenue;
+      const farmMakesLessThanOrEqualMaximumRevenue = farm.revenue <= maximumRevenue;
+      if (farmNameContainsSearchText === false ||
+        farmMakesAtLeastMinimumRevenue === false ||
+        farmMakesLessThanOrEqualMaximumRevenue === false) {
+        farm.display = false;
+      } else {
+        farm.display = true;
+      }
+    });
+    this.setState({ farmList });
+  }
+
   handleSelectFarm(selectedFarmId) {
     return () => {
       this.setState({ selectedFarmId });
@@ -59,23 +91,25 @@ class FarmApp extends React.Component {
   }
 
   handleFarmNameFilter(e) {
-    console.log('e.target.value', e.target.value);
     const searchText = e.target.value.toLowerCase();
-    console.log('searchText', searchText);
-    const { farmList } = this.state;
-    farmList.forEach(farm => {
-      if (farm.name.toLowerCase().indexOf(searchText) === -1) {
-        farm.display = false;
-      } else {
-        farm.display = true;
-      }
-      // no filtered search text
-      if (searchText === '') {
-        farm.display = true;
-      }
-    });
-    console.log('farmList', farmList);
-    this.setState({ farmList });
+    this.setState({ searchText });
+  }
+
+  handleMinimumRevenueFilter(e) {
+    console.log('e.target.value', e.target.value);
+    // TODO: check for number type
+    this.setState({ minimumRevenue: Number(e.target.value) });
+  }
+
+  handleMaximumRevenueFilter(e) {
+    console.log('e.target.value', e.target.value);
+    // TODO: check for number type
+    let value = e.target.value;
+    if (value === '') {
+      // reset
+      value = Number.POSITIVE_INFINITY;
+    }
+    this.setState({ maximumRevenue: Number(value) });
   }
 
   render() {
@@ -102,7 +136,9 @@ class FarmApp extends React.Component {
         >
           <Toolbar />
           <div className={classes.drawerContainer}>
-            <TextField onChange={this.handleFarmNameFilter} />
+            <TextField label="Search for farm name" onChange={this.handleFarmNameFilter} />
+            <TextField label="Minimum revenue" onChange={this.handleMinimumRevenueFilter} />
+            <TextField label="Maximum revenue" onChange={this.handleMaximumRevenueFilter} />
             <List>
               {farmList
                 .filter(farm => farm.display)
