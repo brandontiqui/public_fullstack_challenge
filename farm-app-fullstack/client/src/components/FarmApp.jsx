@@ -12,6 +12,8 @@ import { TextField } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
 
+import farmsAPI from '../api/farms';
+
 const drawerWidth = 240;
 
 class FarmApp extends React.Component {
@@ -29,60 +31,25 @@ class FarmApp extends React.Component {
   }
 
   componentDidMount() {
-    console.log('FarmApp mounted');
-    const farmData = this.getFarmData();
-    const farmList = [];
-    for(let farmId in farmData) {
-      const farm = farmData[farmId];
-      farmList.push({
-        farmId,
-        name: farm.name,
-        display: true
-      });
-    }
-    console.log('farmList', farmList);
-    this.setState({ farmData, farmList });
+    this.getFarmData();
   }
 
   getFarmData() {
-    return {
-      "1": {
-          "name": "McDonald",
-          "state": "WI",
-          "soil_type": "Antigo Silt Loam",
-          "revenue": 120000,
-          "fields": {
-              "NorthWest" : {
-                  "crop": "corn",
-                  "size (acres)": 40
-              },
-              "NorthEast" : {
-                  "crop": "soy",
-                  "size (acres)": 32
-              }
-          }
-      },
-      "2": {
-          "name": "Stardew Valley",
-          "state": "CA",
-          "soil_type": "San Joaquin Series",
-          "revenue": 140800,
-          "fields": {
-              "Mine" : {
-                  "crop": "lettuce",
-                  "size (acres)": 4
-              },
-              "Secret Woods" : {
-                  "crop": "strawberry",
-                  "size (acres)": 12
-              },
-              "Beach" : {
-                  "crop": "ancient berry",
-                  "size (acres)": 1
-              }
-          }
+    farmsAPI.getFarms()
+      .then(farmData => {
+        const farmList = [];
+        for(let farmId in farmData) {
+          const farm = farmData[farmId];
+          farmList.push({
+            farmId,
+            name: farm.name,
+            display: true,
+            revenue: farm.revenue
+          });
         }
-    }
+        console.log('farmList', farmList);
+        this.setState({ farmData, farmList });
+      });
   }
 
   handleSelectFarm(selectedFarmId) {
