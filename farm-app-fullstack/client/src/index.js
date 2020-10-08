@@ -1,6 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import FarmApp from './components/FarmApp.jsx'
+import FarmApp from './components/FarmApp'
+
+console.log('FarmApp', FarmApp);
 
 const App = (props)=>{
   return (
