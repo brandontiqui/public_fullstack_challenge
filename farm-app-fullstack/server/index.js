@@ -3,6 +3,7 @@ const fs = require('fs');
 
 let app = express();
 
+// initialize farm data from file
 const rawData = fs.readFileSync('farm_data.json');
 const farmData = JSON.parse(rawData);
 
@@ -24,5 +25,6 @@ app.listen(port, function() {
 });
 
 app.get('/farms', function(req, res) {
+	// return farm data
 	return res.send(farmData);
 });

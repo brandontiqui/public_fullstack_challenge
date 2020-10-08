@@ -16,11 +16,13 @@ import CardContent from '@material-ui/core/CardContent';
 import { makeStyles } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/core/styles';
 
+// API to retrieve farm data
 import farmsAPI from '../api/farms';
 
 const drawerWidth = 240;
 
 class FarmApp extends React.Component {
+
   constructor(props) {
     super(props);
 
@@ -42,10 +44,12 @@ class FarmApp extends React.Component {
   }
 
   componentDidMount() {
+    // initialize app with farm data
     this.getFarmData();
   }
 
   componentDidUpdate(prevProps, prevState) {
+    // filtering happens under these conditions
     const newSearchText = prevState.searchText !== this.state.searchText;
     const newMinimumRevenue = prevState.minimumRevenue !== this.state.minimumRevenue;
     const newMaximumRevenue = prevState.maximumRevenue !== this.state.maximumRevenue;
@@ -55,6 +59,8 @@ class FarmApp extends React.Component {
   }
 
   getFarmData() {
+    // formats data into a list
+    // this list is used to filter data
     farmsAPI.getFarms()
       .then(farmData => {
         const farmList = [];
@@ -67,13 +73,12 @@ class FarmApp extends React.Component {
             revenue: farm.revenue
           });
         }
-        console.log('farmList', farmList);
-        console.log('farmData', farmData);
         this.setState({ farmData, farmList });
       });
   }
 
   filterFarms() {
+    // filters farm data on farm name and revenue constraints
     const { farmList, searchText, minimumRevenue, maximumRevenue } = this.state;
     farmList.forEach(farm => {
       const farmNameContainsSearchText = farm.name.toLowerCase().indexOf(searchText) > -1;
@@ -91,20 +96,24 @@ class FarmApp extends React.Component {
   }
 
   handleSelectFarm(selectedFarmId) {
+    // save selected farm ID
     return () => {
       this.setState({ selectedFarmId });
     };
   }
 
   handleFarmNameFilter(e) {
+    // save search text
     const searchText = e.target.value.toLowerCase();
     this.setState({ searchText });
   }
 
   handleMinimumRevenueFilter(e) {
+    // save minimum revenue
     this.setState({ minimumRevenueError: ''});
     let value = e.target.value;
     if (isNaN(Number(value))) {
+      // display error
       this.setState({ minimumRevenueError: 'Enter a number.'})
       return;
     }
@@ -116,9 +125,11 @@ class FarmApp extends React.Component {
   }
 
   handleMaximumRevenueFilter(e) {
+    // save maximum revenue
     this.setState({ maximumRevenueError: ''});
     let value = e.target.value;
     if (isNaN(Number(value))) {
+      // display error
       this.setState({ maximumRevenueError: 'Enter a number.'})
       return;
     }
